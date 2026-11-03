@@ -1,0 +1,40 @@
+<section class="page">
+  <header class="page-head">
+    <div>
+      <h1>Providers</h1>
+      <p class="lede">Set a provider offline and their appointments are rescheduled automatically in the background.</p>
+    </div>
+    <div class="page-tools"><button type="button" class="btn" (click)="load()">Refresh</button></div>
+  </header>
+
+  @if (loading()) {
+    <p class="loading"><span class="spinner" aria-hidden="true"></span> Loading providers…</p>
+  } @else if (providers().length === 0) {
+    <div class="empty"><strong>No providers yet.</strong></div>
+  } @else {
+    <section class="card load" aria-labelledby="load-title">
+      <h2 id="load-title">Provider load</h2>
+      <ul class="load-list">
+        @for (provider of providers(); track provider.id) {
+          <li>
+            <span class="load-name">{{ provider.name }}</span>
+            <span class="load-bars">
+              <span class="load-bar" [style.width.%]="(statsFor(provider).upcoming / maxUpcoming()) * 100"
+                    [attr.data-empty]="statsFor(provider).upcoming === 0"></span>
+            </span>
+            <span class="load-numbers">
+              <strong>{{ statsFor(provider).upcoming }}</strong> upcoming ·
+              <strong>{{ statsFor(provider).openSlots }}</strong> open slots
+            </span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <div class="grid">
+      @for (provider of providers(); track provider.id) {
+        <app-provider-card [provider]="provider" [stats]="statsFor(provider)" (changed)="onChanged($event)" />
+      }
+    </div>
+  }
+</section>

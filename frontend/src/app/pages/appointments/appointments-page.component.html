@@ -1,0 +1,83 @@
+<section class="page">
+  <header class="page-head">
+    <div>
+      <h1>Appointments</h1>
+      <p class="lede">Every booking, colour coded by type. Ask for a new slot on any appointment that is not completed.</p>
+    </div>
+    <div class="page-tools">
+      <button type="button" class="btn" (click)="load()">Refresh</button>
+      <button type="button" class="btn btn-primary" [attr.aria-expanded]="showForm()" (click)="showForm.set(!showForm())">
+        {{ showForm() ? 'Hide form' : 'Book appointment' }}
+      </button>
+    </div>
+  </header>
+
+  @if (showForm()) {
+    <app-book-appointment-form (booked)="onBooked()" (closed)="showForm.set(false)" />
+  }
+
+  <div class="chips" role="group" aria-label="Filter by status">
+    <button type="button" class="chip" [attr.aria-pressed]="filter() === 'ALL'" (click)="setFilter('ALL')">
+      All <span class="chip-count">{{ counts().get('ALL') }}</span>
+    </button>
+    @for (status of statuses; track status) {
+      <button type="button" class="chip" [attr.aria-pressed]="filter() === status" (click)="setFilter(status)">
+        {{ statusLabel(status) }} <span class="chip-count">{{ counts().get(status) }}</span>
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <p class="loading"><span class="spinner" aria-hidden="true"></span> Loading appointments…</p>
+  } @else if (failed() && all().length === 0) {
+    <div class="inline-alert" role="alert"><p>Could not load appointments.</p><button type="button" class="btn" (click)="load()">Try again</button></div>
+  } @else if (visible().length === 0) {
+    <div class="empty"><strong>No appointments here.</strong><p>Nothing matches this filter.</p></div>
+  } @else {
+    <div class="table-wrap">
+      <table class="data">
+        <caption class="sr-only">Appointments</caption>
+        <thead>
+          <tr>
+            <th scope="col">Patient</th>
+            <th scope="col">Type</th>
+            <th scope="col">Provider</th>
+            <th scope="col">Time</th>
+            <th scope="col">Status</th>
+            <th scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of visible(); track a.id) {
+            <tr [attr.data-type]="a.type" class="type-row">
+              <th scope="row">
+                {{ a.patientName }}
+                <div class="muted">{{ a.id }}@if (a.patientPhone) { · {{ a.patientPhone }} }</div>
+              </th>
+              <td><app-status-badge kind="appointmentType" [value]="a.type" /></td>
+              <td>{{ a.provider.name }}</td>
+              <td>
+                {{ a.slot.startTime | localDate }}
+                <div class="muted">{{ a.slot.durationMinutes }} min</div>
+              </td>
+              <td>
+                <app-status-badge kind="appointmentStatus" [value]="a.status" />
+                @if (a.rescheduleCount > 0) {
+                  <div class="muted">moved {{ a.rescheduleCount }}×</div>
+                }
+              </td>
+              <td class="cell-actions">
+                @if (canSuggest(a)) {
+                  <button type="button" class="btn" [disabled]="busyId() === a.id" (click)="suggest(a)"
+                          [attr.aria-label]="'Suggest a new slot for ' + a.patientName">
+                    {{ busyId() === a.id ? 'Searching…' : 'Suggest new slot' }}
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -1,0 +1,61 @@
+<article class="card provider-card" [attr.data-status]="provider.status">
+  <header class="provider-head">
+    <div>
+      <h3>{{ provider.name }}</h3>
+      <span class="muted">{{ provider.specialty | titlecase }} · {{ provider.id }}</span>
+    </div>
+    <app-status-badge kind="providerStatus" [value]="provider.status" />
+  </header>
+
+  @if (provider.statusReason || provider.statusChangedAt) {
+    <p class="muted provider-reason">
+      @if (provider.statusReason) { “{{ provider.statusReason }}” }
+      @if (provider.statusChangedAt) { · since {{ provider.statusChangedAt | localDate }} }
+    </p>
+  }
+
+  <dl class="stats">
+    <div><dt>Upcoming</dt><dd>{{ stats.upcoming }}</dd></div>
+    <div><dt>Waiting</dt><dd>{{ stats.waiting }}</dd></div>
+    <div><dt>Open slots</dt><dd>{{ stats.openSlots }}</dd></div>
+  </dl>
+
+  <form class="provider-form" (submit)="$event.preventDefault(); apply()">
+    <fieldset class="segmented">
+      <legend>Set status</legend>
+      @for (status of statuses; track status) {
+        <label class="segment" [class.segment-active]="selected() === status">
+          <input type="radio" [name]="'status-' + provider.id" [value]="status" [checked]="selected() === status"
+                 (change)="choose(status)" />
+          {{ statusLabel(status) }}
+        </label>
+      }
+    </fieldset>
+
+    @if (dirty) {
+      <label class="field">
+        <span>Reason (optional)</span>
+        <input type="text" maxlength="255" [value]="reason()" (input)="reason.set($any($event.target).value)"
+               [placeholder]="selected() === 'OFFLINE' ? 'Sick leave' : 'Back from leave'" />
+      </label>
+      <div class="actions">
+        <button type="button" class="btn" (click)="chosen.set(null); reason.set('')">Undo</button>
+        <button type="submit" class="btn" [class.btn-danger]="selected() === 'OFFLINE'" [class.btn-primary]="selected() !== 'OFFLINE'"
+                [disabled]="busy()">
+          {{ busy() ? 'Saving…' : 'Apply change' }}
+        </button>
+      </div>
+    }
+  </form>
+
+  @if (confirming()) {
+    <app-confirm-dialog [title]="'Take ' + provider.name + ' offline?'" confirmLabel="Take offline" tone="danger"
+                        [busy]="busy()" (confirmed)="save()" (cancelled)="confirming.set(false)">
+      <p>
+        {{ provider.name }} has {{ stats.upcoming }} upcoming appointment{{ stats.upcoming === 1 ? '' : 's' }}.
+        SlotMind will now look for a new slot for each confirmed one and queue a proposal for you.
+      </p>
+      <p>Nothing is rebooked until you accept each proposal in the Reschedule queue.</p>
+    </app-confirm-dialog>
+  }
+</article>

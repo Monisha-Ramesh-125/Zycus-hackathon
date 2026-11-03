@@ -1,0 +1,44 @@
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">S</span>
+    <div class="brand-text"><strong>SlotMind</strong><small>Front desk</small></div>
+  </div>
+
+  <nav class="nav" aria-label="Main">
+    <a routerLink="/queue" routerLinkActive="active">
+      Reschedule queue
+      @if (queue.waitingCount() > 0) {
+        <span class="count" [attr.aria-label]="queue.waitingCount() + ' waiting'">{{ queue.waitingCount() }}</span>
+      }
+    </a>
+    <a routerLink="/appointments" routerLinkActive="active">Appointments</a>
+    <a routerLink="/providers" routerLinkActive="active">Providers</a>
+    <a routerLink="/slots" routerLinkActive="active">Slots</a>
+  </nav>
+
+  <div class="topbar-tools">
+    <app-strategy-switcher />
+    <span class="conn" role="status" [attr.data-state]="online() === null ? 'checking' : online() ? 'up' : 'down'">
+      <span class="conn-dot" aria-hidden="true"></span>
+      {{ online() === null ? 'Checking…' : online() ? 'Backend connected' : 'Backend unreachable' }}
+    </span>
+  </div>
+</header>
+
+<div class="notices" aria-live="polite">
+  @for (notice of notifications.notices(); track notice.id) {
+    <div class="notice" [attr.data-kind]="notice.kind" [attr.role]="notice.kind === 'error' ? 'alert' : 'status'">
+      <span class="notice-text">{{ notice.text }}</span>
+      @if (notice.link; as link) {
+        <a class="notice-link" [routerLink]="link.route">{{ link.label }}</a>
+      }
+      <button type="button" class="notice-close" aria-label="Dismiss message" (click)="notifications.dismiss(notice.id)">×</button>
+    </div>
+  }
+</div>
+
+<main id="main" tabindex="-1">
+  <router-outlet />
+</main>

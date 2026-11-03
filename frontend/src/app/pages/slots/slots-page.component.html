@@ -1,0 +1,144 @@
+<section class="page">
+  <header class="page-head">
+    <div>
+      <h1>Slots</h1>
+      <p class="lede">Open, booked and cancelled time slots. Cancelling a booked slot reschedules its appointment automatically.</p>
+    </div>
+    <div class="page-tools">
+      <button type="button" class="btn" (click)="load()">Refresh</button>
+      <button type="button" class="btn btn-primary" [attr.aria-expanded]="showCreate()" (click)="showCreate.set(!showCreate())">
+        {{ showCreate() ? 'Hide form' : 'Create slot' }}
+      </button>
+    </div>
+  </header>
+
+  @if (showCreate()) {
+    <form class="card form" [formGroup]="createForm" (ngSubmit)="create()" aria-labelledby="create-title">
+      <h2 id="create-title">Create an open slot</h2>
+      <div class="form-grid">
+        <label class="field">
+          <span>Provider</span>
+          <select formControlName="providerId">
+            <option value="">Choose a provider</option>
+            @for (provider of providers(); track provider.id) {
+              <option [value]="provider.id">{{ provider.name }}</option>
+            }
+          </select>
+        </label>
+        <label class="field">
+          <span>Start</span>
+          <input type="datetime-local" formControlName="startTime" />
+        </label>
+        <label class="field">
+          <span>Length (minutes)</span>
+          <input type="number" formControlName="durationMinutes" min="5" max="480" step="5" />
+          @if (createForm.controls.durationMinutes.touched && createForm.controls.durationMinutes.invalid) {
+            <small class="field-error">Enter between 5 and 480 minutes.</small>
+          }
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn btn-primary" [disabled]="createForm.invalid || creating()">
+          {{ creating() ? 'Creating…' : 'Create slot' }}
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (loading()) {
+    <p class="loading"><span class="spinner" aria-hidden="true"></span> Loading slots…</p>
+  } @else {
+    <section class="card" aria-labelledby="day-title">
+      <header class="card-head">
+        <h2 id="day-title">Day view</h2>
+        <div class="day-picker">
+          <button type="button" class="btn" aria-label="Previous day" (click)="shiftDay(-1)">‹</button>
+          <input type="date" aria-label="Day" [value]="day()" (change)="setDay($any($event.target).value)" />
+          <button type="button" class="btn" aria-label="Next day" (click)="shiftDay(1)">›</button>
+        </div>
+      </header>
+      <app-slot-timeline [providers]="providers()" [slots]="slots()" [appointments]="appointments()" [date]="day()" />
+    </section>
+
+    <section aria-labelledby="all-title">
+      <div class="section-head">
+        <h2 id="all-title">All slots</h2>
+        <div class="filters">
+          <label class="field field-inline">
+            <span>Status</span>
+            <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)">
+              <option value="">All</option>
+              @for (status of statuses; track status) {
+                <option [value]="status">{{ statusLabel(status) }}</option>
+              }
+            </select>
+          </label>
+          <label class="field field-inline">
+            <span>Provider</span>
+            <select [value]="providerFilter()" (change)="providerFilter.set($any($event.target).value)">
+              <option value="">All</option>
+              @for (provider of providers(); track provider.id) {
+                <option [value]="provider.id">{{ provider.name }}</option>
+              }
+            </select>
+          </label>
+        </div>
+      </div>
+
+      @if (visible().length === 0) {
+        <div class="empty"><strong>No slots match.</strong></div>
+      } @else {
+        <div class="table-wrap">
+          <table class="data">
+            <caption class="sr-only">Slots</caption>
+            <thead>
+              <tr>
+                <th scope="col">Slot</th>
+                <th scope="col">Provider</th>
+                <th scope="col">Time</th>
+                <th scope="col">Status</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (slot of visible(); track slot.id) {
+                <tr>
+                  <th scope="row">{{ slot.id }}</th>
+                  <td>{{ slot.providerName }}</td>
+                  <td>{{ slot.startTime | localDate }} <span class="muted">· {{ slot.durationMinutes }} min</span></td>
+                  <td>
+                    <app-status-badge kind="slotStatus" [value]="slot.status" />
+                    @if (slot.statusReason) {
+                      <div class="muted">{{ slot.statusReason }}</div>
+                    }
+                  </td>
+                  <td class="cell-actions">
+                    @if (slot.status !== 'CANCELLED') {
+                      <button type="button" class="btn btn-ghost-danger" (click)="askCancel(slot)"
+                              [attr.aria-label]="'Cancel slot ' + slot.id">Cancel slot</button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+
+  @if (toCancel(); as slot) {
+    <app-confirm-dialog [title]="'Cancel slot ' + slot.id + '?'" confirmLabel="Cancel slot" tone="danger"
+                        [busy]="cancelling()" (confirmed)="confirmCancel()" (cancelled)="toCancel.set(null)">
+      <p>{{ slot.providerName }}, {{ slot.startTime | localDate }}.</p>
+      @if (slot.status === 'BOOKED') {
+        <p>An appointment is booked in this slot. It will be rescheduled automatically and a proposal will appear in the queue.</p>
+      }
+      <label class="field">
+        <span>Reason (optional)</span>
+        <input type="text" maxlength="255" placeholder="Room unavailable" [value]="cancelReason()"
+               (input)="cancelReason.set($any($event.target).value)" />
+      </label>
+    </app-confirm-dialog>
+  }
+</section>

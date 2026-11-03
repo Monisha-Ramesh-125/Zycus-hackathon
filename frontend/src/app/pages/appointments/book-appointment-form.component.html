@@ -1,0 +1,66 @@
+<form class="card form" [formGroup]="form" (ngSubmit)="submit()" aria-labelledby="book-title">
+  <h2 id="book-title">Book an appointment</h2>
+
+  <div class="form-grid">
+    <label class="field">
+      <span>Patient name</span>
+      <input type="text" formControlName="patientName" maxlength="120" autocomplete="off" />
+      @if (form.controls.patientName.touched && form.controls.patientName.invalid) {
+        <small class="field-error">Enter the patient's name.</small>
+      }
+    </label>
+
+    <label class="field">
+      <span>Type</span>
+      <select formControlName="type">
+        @for (type of types; track type) {
+          <option [value]="type">{{ typeLabel(type) }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Provider</span>
+      <select formControlName="providerId">
+        <option value="">Choose a provider</option>
+        @for (provider of providers(); track provider.id) {
+          <option [value]="provider.id" [disabled]="provider.status === 'OFFLINE'">
+            {{ provider.name }} ({{ provider.specialty | titlecase }}){{ provider.status === 'OFFLINE' ? ' – offline' : '' }}
+          </option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Open slot</span>
+      <select formControlName="slotId" [attr.aria-busy]="loadingSlots()">
+        <option value="">
+          {{ !form.controls.providerId.value ? 'Choose a provider first' : loadingSlots() ? 'Loading slots…' : openSlots().length ? 'Choose a slot' : 'No open slots' }}
+        </option>
+        @for (slot of openSlots(); track slot.id) {
+          <option [value]="slot.id">{{ slotLabel(slot) }}</option>
+        }
+      </select>
+      @if (form.controls.providerId.value && !loadingSlots() && openSlots().length === 0) {
+        <small class="field-hint">This provider has no open future slots. Create one on the Slots page.</small>
+      }
+    </label>
+
+    <label class="field">
+      <span>Phone (optional)</span>
+      <input type="tel" formControlName="patientPhone" maxlength="40" autocomplete="off" />
+    </label>
+
+    <label class="field field-wide">
+      <span>Notes (optional)</span>
+      <textarea rows="2" formControlName="notes" maxlength="500"></textarea>
+    </label>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn" (click)="closed.emit()">Close</button>
+    <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving()">
+      {{ saving() ? 'Booking…' : 'Book appointment' }}
+    </button>
+  </div>
+</form>

@@ -1,0 +1,35 @@
+@if (axis(); as axis) {
+  <div class="timeline" role="group" aria-label="Slots by provider">
+    <div class="timeline-row timeline-axis">
+      <span class="timeline-name"></span>
+      <div class="timeline-track" aria-hidden="true">
+        @for (tick of axis.ticks; track tick.label) {
+          <span class="timeline-tick" [style.left.%]="tick.left">{{ tick.label }}</span>
+        }
+      </div>
+    </div>
+    @for (row of rows(); track row.provider.id) {
+      <div class="timeline-row">
+        <span class="timeline-name">{{ row.provider.name }}</span>
+        <ul class="timeline-track">
+          @for (tick of axis.ticks; track tick.label) {
+            <li class="timeline-grid" aria-hidden="true" [style.left.%]="tick.left"></li>
+          }
+          @for (block of row.blocks; track block.id) {
+            <li class="timeline-block" [attr.data-status]="block.status" [style.left.%]="block.left"
+                [style.width.%]="block.width" [title]="block.detail" [attr.aria-label]="block.detail">
+              <span>{{ block.label }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+  <p class="legend" aria-hidden="true">
+    <span class="legend-item" data-status="OPEN">Open</span>
+    <span class="legend-item" data-status="BOOKED">Booked (patient)</span>
+    <span class="legend-item" data-status="CANCELLED">Cancelled</span>
+  </p>
+} @else {
+  <div class="empty"><strong>No slots on this day.</strong><p>Pick another date, or create a slot below.</p></div>
+}

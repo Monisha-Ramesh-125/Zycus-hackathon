@@ -1,0 +1,41 @@
+<section class="page">
+  <header class="page-head">
+    <div>
+      <h1>Reschedule queue</h1>
+      <p class="lede">Appointments that need a new time. Phone the patient, then accept or reject the proposal.</p>
+    </div>
+    <div class="page-tools">
+      @if (queue.lastUpdated()) {
+        <span class="muted" role="status">Updated {{ lastUpdatedText() }}</span>
+      }
+      <button type="button" class="btn" (click)="queue.refresh()">Refresh</button>
+    </div>
+  </header>
+
+  @if (queue.failed()) {
+    <div class="inline-alert" role="alert">
+      <p>Could not refresh the queue. @if (items().length) { Showing the last data; }retrying automatically.</p>
+    </div>
+  }
+
+  @if (queue.loading()) {
+    <p class="loading"><span class="spinner" aria-hidden="true"></span> Loading the queue…</p>
+  } @else if (items().length === 0 && !queue.failed()) {
+    <div class="empty">
+      <strong>Nothing is waiting.</strong>
+      <p>Every appointment is confirmed. When a provider goes offline or a slot is cancelled, affected appointments appear here with a proposed new slot.</p>
+    </div>
+  } @else {
+    <ul class="summary" aria-label="Queue summary">
+      <li><strong>{{ items().length }}</strong> waiting</li>
+      <li><strong>{{ withSuggestion() }}</strong> with a proposal</li>
+      <li [class.summary-warn]="withoutSuggestion() > 0"><strong>{{ withoutSuggestion() }}</strong> with no slot found</li>
+    </ul>
+
+    <div class="stack">
+      @for (appointment of items(); track appointment.id) {
+        <app-queue-card [appointment]="appointment" (resolved)="queue.refresh()" />
+      }
+    </div>
+  }
+</section>

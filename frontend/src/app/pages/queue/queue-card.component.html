@@ -1,0 +1,119 @@
+<article class="card queue-card" [attr.data-type]="appointment.type">
+  <header class="queue-card-head">
+    <div>
+      <h2 class="queue-patient">{{ appointment.patientName }}</h2>
+      <div class="queue-meta">
+        <app-status-badge kind="appointmentType" [value]="appointment.type" />
+        <span class="muted">{{ appointment.id }}</span>
+        @if (appointment.patientPhone) {
+          <span class="muted">· {{ appointment.patientPhone }}</span>
+        }
+        @if (appointment.rescheduleCount > 0) {
+          <span class="muted">· moved {{ appointment.rescheduleCount }}×</span>
+        }
+      </div>
+    </div>
+    @if (appointment.pendingSuggestion; as s) {
+      <div class="queue-tags">
+        <app-status-badge kind="trigger" [value]="s.triggerReason" />
+        <span class="badge" [attr.data-tone]="strategy.tone" [title]="strategy.hint">{{ strategy.label }}</span>
+      </div>
+    }
+  </header>
+
+  @if (appointment.pendingSuggestion; as s) {
+    <div class="swap">
+      <div class="swap-side">
+        <span class="swap-label">Currently</span>
+        <strong>{{ appointment.provider.name }}</strong>
+        <span>{{ appointment.slot.startTime | localDate }}</span>
+        <span class="muted">{{ appointment.slot.durationMinutes }} min</span>
+      </div>
+      <span class="swap-arrow" aria-hidden="true">→</span>
+      <div class="swap-side swap-new">
+        <span class="swap-label">Proposed</span>
+        <strong>{{ s.recommendedSlot.providerName }}</strong>
+        <span>{{ s.recommendedSlot.startTime | localDate }}</span>
+        <span class="muted">{{ s.recommendedSlot.durationMinutes }} min</span>
+        @if (s.alternateProvider) {
+          <span class="badge" data-tone="amber">Different provider</span>
+        }
+      </div>
+    </div>
+
+    <app-confidence-bar [value]="s.confidence" />
+
+    <blockquote class="reasoning">
+      <span class="reasoning-label">What to tell the patient</span>
+      {{ s.reasoning }}
+    </blockquote>
+
+    @if (problem()) {
+      <div class="inline-alert" role="alert">
+        <p>
+          {{ problemText }}
+          @if (findMessage()) {
+            <strong>{{ findMessage() }}</strong>
+          }
+        </p>
+        <div class="actions actions-inline">
+          <button type="button" class="btn btn-primary" [disabled]="finding() || busy()" (click)="findSlot()">
+            {{ finding() ? 'Searching…' : 'Find a new slot' }}
+          </button>
+          <button type="button" class="btn" [disabled]="finding() || busy()" (click)="dismiss()">
+            {{ busy() ? 'Working…' : 'Dismiss this proposal' }}
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (panel(); as p) {
+      <form class="decision" (submit)="$event.preventDefault(); submit()">
+        <p class="decision-text">
+          @if (p === 'ACCEPT') {
+            Confirm only after the patient agreed to this time. Accepting books the new slot and frees the old one.
+          } @else {
+            Reject this proposal. The appointment stays in the queue so you can ask for another slot.
+          }
+        </p>
+        <label class="field">
+          <span>Note (optional)</span>
+          <textarea rows="2" maxlength="500" [value]="note()" (input)="note.set($any($event.target).value)"
+                    [placeholder]="p === 'ACCEPT' ? 'Patient confirmed by phone' : 'Patient wants a later time'"></textarea>
+        </label>
+        <div class="actions">
+          <button type="button" class="btn" [disabled]="busy()" (click)="close()">Back</button>
+          <button type="submit" class="btn" [class.btn-primary]="p === 'ACCEPT'" [class.btn-danger]="p === 'REJECT'" [disabled]="busy()">
+            {{ busy() ? 'Working…' : p === 'ACCEPT' ? 'Confirm accept' : 'Confirm reject' }}
+          </button>
+        </div>
+      </form>
+    } @else {
+      <div class="actions">
+        <button type="button" class="btn btn-primary" (click)="open('ACCEPT')">Accept</button>
+        <button type="button" class="btn" (click)="open('REJECT')">Reject</button>
+      </div>
+    }
+  } @else {
+    <div class="swap">
+      <div class="swap-side">
+        <span class="swap-label">Currently</span>
+        <strong>{{ appointment.provider.name }}</strong>
+        <span>{{ appointment.slot.startTime | localDate }}</span>
+        <span class="muted">{{ appointment.slot.durationMinutes }} min</span>
+      </div>
+    </div>
+    <div class="no-slot">
+      <strong>No slot found</strong>
+      <p>
+        Nothing open fits this appointment yet.
+        @if (findMessage()) {
+          <span>{{ findMessage() }}</span>
+        }
+      </p>
+      <button type="button" class="btn btn-primary" [disabled]="finding()" (click)="findSlot()">
+        {{ finding() ? 'Searching…' : 'Find a slot' }}
+      </button>
+    </div>
+  }
+</article>
