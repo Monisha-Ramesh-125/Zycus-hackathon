@@ -95,7 +95,7 @@ Fresh seed, app running:
 5. Cancel `SLT-001` on a fresh seed: a `SLOT_CANCELLED` suggestion appears for `APT-001`.
 6. Cancel `SLT-003` (`APT-003` is urgent, pediatric, 45 minutes, and only 30-minute slots are open): `APT-003` becomes `RESCHEDULE_PENDING` with no suggestion, and is visible in the list. After creating a longer slot for Dr. Sharma, `POST /api/appointments/APT-003/suggest` produces one.
 7. The full demo path through the API: offline, suggestions appear, accept `APT-001`'s (200), then accept `APT-002`'s onto the same slot (409). Slots and appointments end up consistent.
-8. The app log shows one summary line per run, and `./mvnw test` still passes.
+8. The app log shows one summary line per run, and `cd backend && ./mvnw test` still passes.
 
 I reset the demo data afterwards, as before.
 

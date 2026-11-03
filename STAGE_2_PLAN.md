@@ -101,7 +101,7 @@ With the app running and seeded:
 6. Booking an open slot of an offline provider returns 409.
 7. `PATCH /api/slots/SLT-004/status` to `CANCELLED` works; to `OPEN` returns 400.
 8. A request with a missing `patientName` or a bad `type` returns 400 with a readable message.
-9. `./mvnw test` passes.
+9. `cd backend && ./mvnw test` passes.
 10. The Angular page still shows "Backend: connected".
 
 Note: step 5 changes the demo data (Dr. Chen offline). Reset by setting her back to `BUSY`, or by emptying the tables and restarting.

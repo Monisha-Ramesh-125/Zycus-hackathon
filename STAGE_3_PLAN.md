@@ -114,7 +114,7 @@ On freshly seeded data (provider ids and slot ids from the seed), with the app r
 6. `GET /api/suggestions?status=PENDING` lists them.
 7. Cancel `SLT-004` and `SLT-005`, then suggest again for a fresh appointment: 409 `NO_SLOT_AVAILABLE`.
 8. `PUT /api/scheduling/strategy` with an unknown name returns 404.
-9. `./mvnw test` passes.
+9. `cd backend && ./mvnw test` passes.
 
 Steps 2 to 5 change demo data; I reset it afterwards by dropping the tables so the next start reseeds.
 

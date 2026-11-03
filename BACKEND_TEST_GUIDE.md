@@ -10,7 +10,7 @@ cd "/Users/terzo/Downloads/inventoryservice 2"
 # optional, for the AI strategy (key stays in your shell, never in the project)
 export GEMINI_API_KEY="$(cat ~/.slotmind-gemini-key)"
 
-./mvnw spring-boot:run
+cd backend && ./mvnw spring-boot:run
 # if port 8082 is busy:  ./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8090
 ```
 
@@ -122,7 +122,7 @@ curl -s -X PUT $U/scheduling/strategy -H "$H" -d '{"strategy":"ai"}'
 ```
 Without `GEMINI_API_KEY`, or if Gemini fails, the result is still returned by the rules and labelled `"strategy":"ai->rule-fallback"`.
 
-## 8. Where each idea lives in the code (`src/main/java/com/example/slotmind`)
+## 8. Where each idea lives in the code (`backend/src/main/java/com/example/slotmind`)
 
 | Idea | Where |
 |---|---|
@@ -134,7 +134,7 @@ Without `GEMINI_API_KEY`, or if Gemini fails, the result is still returned by th
 | Suggestion logic (dedupe, stale, accept) | `service/SuggestionService` |
 | LLM call and prompts | `ai/LLMGateway`, `ai/SchedulingPromptFactory` |
 | Error responses | `exception/GlobalExceptionHandler` |
-| Settings | `src/main/resources/application*.properties` |
+| Settings | `backend/src/main/resources/application*.properties` |
 
 Stage plans with the reasoning behind each choice: `STAGE_1_PLAN.md` to `STAGE_7_PLAN.md`; progress in `STAGES.md`.
 

@@ -107,7 +107,7 @@ Fresh seed, app running:
 5. Suggest again for `APT-002`: the stale suggestion is rejected and a new one offers `SLT-001` (just freed by John), same provider, confidence 0.90.
 6. Reject that new suggestion with a note: `REJECTED`, appointment still `RESCHEDULE_PENDING`.
 7. Concurrency by hand: two parallel `PATCH` requests accepting two suggestions that share a slot: one 200, one 409.
-8. `./mvnw test` passes, including the concurrency cases.
+8. `cd backend && ./mvnw test` passes, including the concurrency cases.
 
 Steps 1 to 6 depend on the seed's slot times still being in the future (they are set at first start, +60 minutes onwards), so run them soon after a fresh start. I reset the demo data afterwards.
 

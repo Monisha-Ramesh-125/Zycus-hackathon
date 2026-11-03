@@ -28,7 +28,7 @@ echo "1/3 Dropping the four tables in '$DB_NAME'..."
 sql "SET FOREIGN_KEY_CHECKS=0; DROP TABLE IF EXISTS reschedule_suggestions, appointments, slots, providers; SET FOREIGN_KEY_CHECKS=1;" || exit 1
 
 echo "2/3 Recreating tables and demo data (temporary backend on port $PORT)..."
-( env -u GEMINI_API_KEY ./mvnw -q spring-boot:run -Dspring-boot.run.arguments="--server.port=$PORT" >"$LOG" 2>&1 ) &
+( cd backend && env -u GEMINI_API_KEY ./mvnw -q spring-boot:run -Dspring-boot.run.arguments="--server.port=$PORT" >"$LOG" 2>&1 ) &
 for _ in $(seq 1 60); do
   sleep 2
   grep -q -E "Started SlotmindApplication|APPLICATION FAILED|BUILD FAILURE" "$LOG" && break

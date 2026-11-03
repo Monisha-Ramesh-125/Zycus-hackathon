@@ -69,7 +69,7 @@ Plain `JpaRepository<Entity, String>` interfaces, annotated `@Repository` like t
 
 ### 1.5 Seed data
 
-The seed is a SQL script, `src/main/resources/db/seed.sql`, taken from Addendum A. Slot times use `DATE_ADD(NOW(), INTERVAL N MINUTE)`, because plain `NOW() + 60` in MariaDB adds 60 seconds, not minutes.
+The seed is a SQL script, `backend/src/main/resources/db/seed.sql`, taken from Addendum A. Slot times use `DATE_ADD(NOW(), INTERVAL N MINUTE)`, because plain `NOW() + 60` in MariaDB adds 60 seconds, not minutes.
 
 How it loads (dev profile only):
 - `spring.sql.init.mode=always` and `spring.sql.init.data-locations=classpath:db/seed.sql`
@@ -113,12 +113,12 @@ Because `INSERT IGNORE` skips existing ids, the slot times are fixed at the firs
 | `entity/*` (4 entities, 7 enums) | create |
 | `repository/*` (4) | create |
 | `exception/BusinessException`, `InvalidStateException`, `SlotUnavailableException` | create |
-| `src/main/resources/db/seed.sql` | create |
+| `backend/src/main/resources/db/seed.sql` | create |
 | `application-dev.properties` | add the `spring.sql.init.*` and `defer-datasource-initialization` settings |
 | `application-qa.properties`, `application-prod.properties` | add `spring.sql.init.mode=never` |
 | `src/test/.../entity/*Test` | create (see §3) |
 
-No changes to `pom.xml` and nothing in `frontend/`.
+No changes to `backend/pom.xml` and nothing in `frontend/`.
 
 ## 3. Tests
 
@@ -131,8 +131,8 @@ Plus the existing `SlotmindApplicationTests` context-load smoke test (it also ex
 
 ## 4. How we verify (definition of done)
 
-1. `./mvnw test` passes.
-2. `./mvnw spring-boot:run` starts without errors (use a free port if 8082 is busy).
+1. `cd backend && ./mvnw test` passes.
+2. `cd backend && ./mvnw spring-boot:run` starts without errors (use a free port if 8082 is busy).
 3. In MariaDB (`slotmind` database): tables `providers`, `slots`, `appointments`, `reschedule_suggestions` exist.
 4. Row counts are 5, 6, 4 and 0. The unique index on `appointments.slot_id` and the `version` columns are present.
 5. Restarting the app does not add duplicate rows.
