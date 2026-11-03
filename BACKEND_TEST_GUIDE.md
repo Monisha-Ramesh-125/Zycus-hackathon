@@ -136,7 +136,7 @@ Without `GEMINI_API_KEY`, or if Gemini fails, the result is still returned by th
 | Error responses | `exception/GlobalExceptionHandler` |
 | Settings | `backend/src/main/resources/application*.properties` |
 
-Stage plans with the reasoning behind each choice: `STAGE_1_PLAN.md` to `STAGE_7_PLAN.md`; progress in `STAGES.md`.
+Stage plans with the reasoning behind each choice: `claude-plans/STAGE_1_PLAN.md` to `claude-plans/STAGE_7_PLAN.md`; progress in `claude-plans/STAGES.md`.
 
 ## 9. Known limits (good to know for questions)
 
